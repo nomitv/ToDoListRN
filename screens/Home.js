@@ -35,7 +35,7 @@ export default class App extends React.Component {
     })
   }
 
-  deleteList(listId){
+  deleteList = (listId) => {
     console.log('List to be deleted', listId)
     // const delList = { listId: listId }
     // console.log('DelList Object',delList)
@@ -50,6 +50,7 @@ export default class App extends React.Component {
       console.log('Response data of post',response.data)
       if(response.data.status === 'success'){
         console.log(response.data.status)
+        this.getList()
         // this.setState({rerender: true})
         // 
       }
@@ -57,7 +58,7 @@ export default class App extends React.Component {
     .catch((error) => {
       console.log(error)
     }) 
-    this.forceUpdate()
+    // this.forceUpdate()
     // this.getList()
   }
 
