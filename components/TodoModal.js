@@ -1,9 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Platform, Button } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, FlatList, KeyboardAvoidingView, TextInput, Keyboard, Platform, Button, Animated } from 'react-native';
 import colors from '../colors';
 import {AntDesign, Ionicons} from '@expo/vector-icons';
 import axios from '../axiosRequest'
 import DateTimePicker from '@react-native-community/datetimepicker'
+// import {Notifications} from 'react-native-notifications'
+import { Swipeable } from 'react-native-gesture-handler'
 
 export default class TodoModal extends React.Component {
     state = {
@@ -12,7 +14,7 @@ export default class TodoModal extends React.Component {
         mode: 'date',
         show: false,
         date: new Date(),
-        time: null
+        time: ''
     };
 
     onChange = (event, selectedDate) => {
@@ -38,6 +40,33 @@ export default class TodoModal extends React.Component {
     showTimepicker = () => {
         this.showMode('time')
     };
+
+    deleteTask = (taskId) => {
+        console.log('Task to be deleted', taskId)
+        // const delList = { listId: listId }
+        // console.log('DelList Object',delList)
+        axios({
+          method: 'DELETE',
+          url: '/task',
+          data: {
+            taskId: taskId
+          }
+        })
+        .then((response) => {
+          console.log('Response data of delete',response.data)
+          if(response.data.status === 'success'){
+            console.log(response.data.status)
+            this.getTask()
+            // this.setState({rerender: true})
+            // 
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        }) 
+        // this.forceUpdate()
+        // this.getList()
+      }
 
     toggleTodoComplete = (todo) =>{
         let task = todo
@@ -90,7 +119,7 @@ export default class TodoModal extends React.Component {
         // this.setState({tasks: [...this.state.tasks,{id: this.state.tasks.length + 1, title: task}]});
         const addNewTask = {
             title: task,
-            listId: this.props.list.id
+            listId: this.props.list.id,
           }
           console.log(addNewTask)
           axios.post('/task', addNewTask)
@@ -112,8 +141,9 @@ export default class TodoModal extends React.Component {
     };
 
     renderTodo = (todo,index) => {
-        // console.log('This is the value of todo and index' ,todo, index)
+        console.log('This is the value of todo and index' ,todo, index)
         return(
+            // <Swipeable renderRightActions={(_, dragX) => this.rightActions(dragX, index)}>
             <View style={styles.todoContainer}>
                 <TouchableOpacity onPress={() => this.toggleTodoComplete(todo)}>
                     <Ionicons 
@@ -134,9 +164,24 @@ export default class TodoModal extends React.Component {
                 >
                     {todo.title}
                 </Text>
+                <View style={styles.delButtonContainer}>
+                <Button title='D' color='red' onPress={() => this.deleteTask(index)}/>
+                </View>
+                
             </View>
+            // </Swipeable>
         );
     }; 
+
+    // rightActions = (dragX, index) => {
+    //     return(
+    //         <TouchableOpacity>
+    //             <Animated.View>
+    //                 <Animated.Text>Delete</Animated.Text>
+    //             </Animated.View>
+    //         </TouchableOpacity>
+    //     )
+    // }
 
     render(){
         // const taskCount = list.todos.length;
@@ -276,6 +321,11 @@ const styles = StyleSheet.create({
         marginHorizontal: 6,
         alignItems: 'center',
         width: 150
+      },
+      delButtonContainer: {
+        borderRadius: 20,
+        alignItems: 'center',
+        width: 550
       },
 
 });
